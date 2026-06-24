@@ -52,7 +52,7 @@ function ProductDetail({ product }) {
 
                 <div className="pt-4 border-t border-goldenrod/20">
                   <p className="text-5xl font-bold text-goldenrod font-serif">
-                    ${product.price}
+                    ₡{product.price}
                   </p>
                   <p className="text-sm text-charcoal-blue/80 mt-1">Precio final</p>
                 </div>

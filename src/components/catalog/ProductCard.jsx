@@ -22,8 +22,9 @@ function ProductCard({ product }) {
 
       <div className="p-4 sm:p-6">
         <h3 className="text-base sm:text-xl font-semibold text-charcoal-blue mb-2 sm:mb-3 font-serif">
-          {product.name}
+          {product.name}        {product.volume}
         </h3>
+
 
         <p className="text-lg sm:text-2xl font-bold text-goldenrod mb-3 sm:mb-4">
           ₡{product.price}
