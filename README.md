@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="/logo.png" alt="Perfumes Z-Aromac Logo" width="120" height="120" />
 
-  # Perfumes Z-Aromac ✨
 
-  **Tu tienda de perfumes de confianza**
+ 
+
+
 
   [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
   [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
