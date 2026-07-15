@@ -4,6 +4,7 @@ import Footer from './components/layout/Footer'
 import HomePage from './pages/HomePage'
 import HombresPage from './pages/HombresPage'
 import MujeresPage from './pages/MujeresPage'
+import UnisexPage from './pages/UnisexPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import SearchResultsPage from './pages/SearchResultsPage'
 
@@ -29,6 +30,8 @@ function App() {
           <Route path="/hombres/:tipo" element={<HombresPage />} />
           <Route path="/mujeres" element={<MujeresPage />} />
           <Route path="/mujeres/:tipo" element={<MujeresPage />} />
+          <Route path="/unisex" element={<UnisexPage />} />
+          <Route path="/unisex/:tipo" element={<UnisexPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/buscar" element={<SearchResultsPage />} />
         </Route>

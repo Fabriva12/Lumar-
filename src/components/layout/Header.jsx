@@ -54,10 +54,11 @@ function Header() {
         </form>
 
         <div className="hidden lg:flex items-center space-x-6 shrink-0">
-          {[
-            { label: 'Hombres', base: '/hombres' },
-            { label: 'Mujeres', base: '/mujeres' },
-          ].map((gender) => (
+            {[
+              { label: 'Hombres', base: '/hombres' },
+              { label: 'Mujeres', base: '/mujeres' },
+              { label: 'Unisex', base: '/unisex' },
+            ].map((gender) => (
             <div
               key={gender.base}
               className="relative"
@@ -124,6 +125,7 @@ function Header() {
             {[
               { label: 'Hombres', base: '/hombres' },
               { label: 'Mujeres', base: '/mujeres' },
+              { label: 'Unisex', base: '/unisex' },
             ].map((gender) => (
               <div key={gender.base}>
                 <Link

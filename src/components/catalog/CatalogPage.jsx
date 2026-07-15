@@ -25,8 +25,8 @@ function CatalogPage({ gender, type }) {
 
   if (error) return <div className="text-center py-16 text-red-600">Error: {error.message}</div>
 
-  const genderLabel = gender === 'hombre' ? 'Hombre' : 'Mujer'
-  const genderPath = gender === 'hombre' ? 'hombres' : 'mujeres'
+  const genderLabel = gender === 'hombre' ? 'Hombre' : gender === 'mujer' ? 'Mujer' : 'Unisex'
+  const genderPath = gender === 'hombre' ? 'hombres' : gender === 'mujer' ? 'mujeres' : 'unisex'
   const typeLabel = type ? PRODUCT_TYPES.find((t) => t.value === type)?.label : null
   const title = typeLabel
     ? `${typeLabel}s para ${genderLabel}`
