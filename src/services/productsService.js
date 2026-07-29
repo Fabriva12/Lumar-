@@ -42,29 +42,35 @@ export async function getProductById(id) {
 }
 
 /**
- * Obtiene productos filtrados por género y tipo
+ * Obtiene productos filtrados por género y tipo (con paginación)
  * @param {string} gender - 'hombre' o 'mujer'
  * @param {string} [type] - 'perfume', 'reloj' o 'crema' (opcional)
- * @returns {Promise<Array>} - Lista de productos
+ * @param {number} [page=1] - Número de página
+ * @param {number} [pageSize=12] - Productos por página
+ * @returns {Promise<{data: Array, count: number}>} - Lista de productos y total
  */
-export async function getProductsByGenderAndType(gender, type) {
+export async function getProductsByGenderAndType(gender, type, page = 1, pageSize = 12) {
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
   let query = supabase
     .from('products')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('gender', gender)
+    .range(from, to)
 
   if (type) {
     query = query.eq('type', type)
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  const { data, error, count } = await query.order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching products by gender and type:', error)
     throw error
   }
 
-  return data || []
+  return { data: data || [], count }
 }
 
 /**
