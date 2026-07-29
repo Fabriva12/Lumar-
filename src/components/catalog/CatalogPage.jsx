@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
 import ProductCard from './ProductCard'
-import LoadingSpinner from '../ui/LoadingSpinner'
+import ProductCardSkeleton from '../ui/ProductCardSkeleton'
 import { PRODUCT_TYPES } from '../../types'
 
 function sortProducts(products, order) {
@@ -18,10 +18,8 @@ function sortProducts(products, order) {
 }
 
 function CatalogPage({ gender, type }) {
-  const { products, loading, error } = useProducts(gender, type)
+  const { products, loading, loadingMore, error, hasMore, loadMore } = useProducts(gender, type)
   const [sortOrder, setSortOrder] = useState('default')
-
-  if (loading) return <LoadingSpinner />
 
   if (error) return <div className="text-center py-16 text-red-600">Error: {error.message}</div>
 
@@ -69,7 +67,7 @@ function CatalogPage({ gender, type }) {
           ))}
         </div>
 
-        {products.length > 0 && (
+        {!loading && products.length > 0 && (
           <div className="flex justify-end mb-10">
             <div className="flex items-center gap-3">
               <label htmlFor="sort-order" className="text-charcoal-blue/70 text-sm font-medium uppercase tracking-wide">
@@ -90,18 +88,49 @@ function CatalogPage({ gender, type }) {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-          {sortedProducts.map((product, index) => (
-            <div
-              key={product.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <ProductCard product={product} />
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={`skeleton-${i}`}
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${i * 0.05}s` }}
+                >
+                  <ProductCardSkeleton />
+                </div>
+              ))
+            : sortedProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+          {loadingMore && (
+            <div className="col-span-full grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={`more-skeleton-${i}`}>
+                  <ProductCardSkeleton />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
 
-        {products.length === 0 && (
+        {!loading && hasMore && (
+          <div className="flex justify-center mt-12">
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="bg-goldenrod text-white px-10 py-4 rounded-full font-semibold text-lg shadow-lg hover:bg-goldenrod/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingMore ? 'Cargando...' : 'Cargar más'}
+            </button>
+          </div>
+        )}
+
+        {!loading && products.length === 0 && !error && (
           <div className="text-center py-16">
             <p className="text-charcoal-blue/80 text-xl">No hay productos disponibles en esta categoría.</p>
             <p className="text-goldenrod mt-2">Pronto agregaremos nuevas fragancias.</p>
