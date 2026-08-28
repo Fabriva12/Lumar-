@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { PRODUCT_TYPES } from "../../types";
 
 function ProductDetail({ product }) {
   const [imageLoading, setImageLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const navigate = useNavigate();
+
+  const typeLabel = PRODUCT_TYPES.find((t) => t.value === product.type)?.label;
 
   const images =
     product.images?.length > 0
@@ -13,8 +17,7 @@ function ProductDetail({ product }) {
         : [];
 
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
-  const typeLabel = PRODUCT_TYPES.find((t) => t.value === product.type)?.label;
-  const message = `Hola! Quiero este perfume: ${product.name}`;
+  const message = `Hola! Quiero consultar por este producto: ${product.name}`;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   function prevImage(e) {
@@ -30,6 +33,21 @@ function ProductDetail({ product }) {
   return (
     <div className="py-16 bg-lavender-blush/80 min-h-screen animate-fade-in">
       <div className="container mx-auto px-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 inline-flex items-center gap-2 text-charcoal-blue/70 hover:text-goldenrod transition-colors text-sm font-medium uppercase tracking-wide"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
+        </button>
+
         <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-goldenrod/20">
           <div className="md:flex">
             <div className="md:w-1/2 bg-gradient-to-br from-lavender-blush to-goldenrod-light/20">

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
+import ScrollToTop from './components/layout/ScrollToTop'
 import HomePage from './pages/HomePage'
 import HombresPage from './pages/HombresPage'
 import MujeresPage from './pages/MujeresPage'
@@ -23,6 +24,7 @@ function PublicLayout() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />

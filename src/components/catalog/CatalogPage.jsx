@@ -1,25 +1,61 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
+import { getBrands } from '../../services/productsService'
 import ProductCard from './ProductCard'
 import ProductCardSkeleton from '../ui/ProductCardSkeleton'
 import { PRODUCT_TYPES } from '../../types'
 
-function sortProducts(products, order) {
-  if (order === 'default') return products
-
-  const sorted = [...products]
-  sorted.sort((a, b) => {
-    const priceA = Number(a.price)
-    const priceB = Number(b.price)
-    return order === 'price-asc' ? priceA - priceB : priceB - priceA
-  })
-  return sorted
-}
-
 function CatalogPage({ gender, type }) {
-  const { products, loading, loadingMore, error, hasMore, loadMore } = useProducts(gender, type)
-  const [sortOrder, setSortOrder] = useState('default')
+  const [brand, setBrand] = useState(null)
+  const [brands, setBrands] = useState([])
+  const [brandOpen, setBrandOpen] = useState(false)
+  const brandRef = useRef(null)
+  const { products, loading, loadingMore, error, hasMore, loadMore } = useProducts(gender, type, brand)
+
+  useEffect(() => {
+    if (!brandOpen) return
+
+    function handleClickOutside(e) {
+      if (brandRef.current && !brandRef.current.contains(e.target)) {
+        setBrandOpen(false)
+      }
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        setBrandOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [brandOpen])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadBrands() {
+      try {
+        const data = await getBrands(gender, type)
+        if (!cancelled) setBrands(data)
+      } catch (err) {
+        console.error('Error loading brands:', err)
+      }
+    }
+
+    setBrand(null)
+    setBrandOpen(false)
+    loadBrands()
+
+    return () => {
+      cancelled = true
+    }
+  }, [gender, type])
 
   if (error) return <div className="text-center py-16 text-red-600">Error: {error.message}</div>
 
@@ -29,7 +65,6 @@ function CatalogPage({ gender, type }) {
   const title = typeLabel
     ? `${typeLabel}s para ${genderLabel}`
     : `Productos para ${genderLabel}`
-  const sortedProducts = sortProducts(products, sortOrder)
 
   return (
     <div className="py-16 bg-lavender-blush/80 min-h-screen">
@@ -67,22 +102,63 @@ function CatalogPage({ gender, type }) {
           ))}
         </div>
 
-        {!loading && products.length > 0 && (
-          <div className="flex justify-end mb-10">
-            <div className="flex items-center gap-3">
-              <label htmlFor="sort-order" className="text-charcoal-blue/70 text-sm font-medium uppercase tracking-wide">
-                Ordenar por
-              </label>
-              <select
-                id="sort-order"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="bg-white border border-goldenrod/20 text-charcoal-blue px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:border-goldenrod/50 focus:ring-1 focus:ring-goldenrod/30 transition-colors cursor-pointer text-sm"
+        {brands.length > 0 && (
+          <div className="flex justify-center mb-10">
+            <div className="relative" ref={brandRef}>
+              <button
+                onClick={() => setBrandOpen(!brandOpen)}
+                aria-haspopup="listbox"
+                aria-expanded={brandOpen}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 bg-white text-charcoal-blue/70 border border-goldenrod/20 hover:border-goldenrod/50"
               >
-                <option value="default">Por defecto</option>
-                <option value="price-asc">Menor precio</option>
-                <option value="price-desc">Mayor precio</option>
-              </select>
+                <span className={brand ? 'text-goldenrod font-semibold' : ''}>
+                  {brand || 'Filtrar por marca'}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${brandOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {brandOpen && (
+                <div
+                  role="listbox"
+                  className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 w-60 bg-white rounded-xl shadow-2xl border border-goldenrod/20 overflow-hidden max-h-72 overflow-y-auto animate-slide-down text-left"
+                >
+                  <button
+                    onClick={() => {
+                      setBrand(null)
+                      setBrandOpen(false)
+                    }}
+                    className={`block w-full px-4 py-3 text-sm text-left transition-colors ${
+                      !brand
+                        ? 'bg-goldenrod/10 text-goldenrod font-semibold'
+                        : 'text-charcoal-blue/70 hover:bg-goldenrod/10'
+                    }`}
+                  >
+                    Todas las marcas
+                  </button>
+                  {brands.map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => {
+                        setBrand(b)
+                        setBrandOpen(false)
+                      }}
+                      className={`block w-full px-4 py-3 text-sm text-left transition-colors border-t border-goldenrod/10 ${
+                        brand === b
+                          ? 'bg-goldenrod/10 text-goldenrod font-semibold'
+                          : 'text-charcoal-blue/70 hover:bg-goldenrod/10'
+                      }`}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -92,16 +168,16 @@ function CatalogPage({ gender, type }) {
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={`skeleton-${i}`}
-                  className="animate-slide-up"
+                  className="animate-slide-up h-full"
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
                   <ProductCardSkeleton />
                 </div>
               ))
-            : sortedProducts.map((product, index) => (
+            : products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="animate-slide-up"
+                  className="animate-slide-up h-full"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ProductCard product={product} />
@@ -110,7 +186,7 @@ function CatalogPage({ gender, type }) {
           {loadingMore && (
             <div className="col-span-full grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={`more-skeleton-${i}`}>
+                <div key={`more-skeleton-${i}`} className="h-full">
                   <ProductCardSkeleton />
                 </div>
               ))}
@@ -132,8 +208,21 @@ function CatalogPage({ gender, type }) {
 
         {!loading && products.length === 0 && !error && (
           <div className="text-center py-16">
-            <p className="text-charcoal-blue/80 text-xl">No hay productos disponibles en esta categoría.</p>
-            <p className="text-goldenrod mt-2">Pronto agregaremos nuevas fragancias.</p>
+            <p className="text-charcoal-blue/80 text-xl">
+              {brand
+                ? `No hay productos de ${brand} en esta categoría.`
+                : 'No hay productos disponibles en esta categoría.'}
+            </p>
+            {brand ? (
+              <button
+                onClick={() => setBrand(null)}
+                className="mt-4 inline-block bg-charcoal-blue text-lavender-blush px-8 py-3 rounded-lg hover:bg-charcoal-blue/80 transition-colors duration-300"
+              >
+                Ver todas las marcas
+              </button>
+            ) : (
+              <p className="text-goldenrod mt-2">Pronto agregaremos nuevas fragancias.</p>
+            )}
           </div>
         )}
       </div>

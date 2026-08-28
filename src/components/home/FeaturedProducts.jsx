@@ -10,7 +10,7 @@ function FeaturedProducts() {
 
   useEffect(() => {
     function handleResize() {
-      setMaxItems(window.innerWidth < 640 ? 6 : 8)
+      setMaxItems(window.innerWidth < 640 ? 4 : 8)
     }
 
     handleResize()
@@ -42,17 +42,17 @@ function FeaturedProducts() {
           Productos <span className="text-goldenrod">Destacados</span>
         </h2>
 
-        <div className="grid grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {loading
             ? Array.from({ length: maxItems }).map((_, i) => (
-                <div key={`skeleton-${i}`} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                <div key={`skeleton-${i}`} className="animate-slide-up h-full" style={{ animationDelay: `${i * 0.05}s` }}>
                   <ProductCardSkeleton />
                 </div>
               ))
             : visibleProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="animate-slide-up"
+                  className="animate-slide-up h-full"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ProductCard product={product} />

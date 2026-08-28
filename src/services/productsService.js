@@ -2,26 +2,6 @@
 import { supabase } from './supabase'
 
 /**
- * Obtiene productos filtrados por género desde la tabla 'products' de Supabase
- * @param {string} gender - 'hombre' o 'mujer'
- * @returns {Promise<Array>} - Lista de productos
- */
-export async function getProductsByGender(gender) {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('gender', gender)
-    .order('created_at', { ascending: false })
-  
-  if (error) {
-    console.error('Error fetching products by gender:', error)
-    throw error
-  }
-  
-  return data || []
-}
-
-/**
  * Obtiene un producto específico por su ID
  * @param {string} id - UUID del producto
  * @returns {Promise<Object>} - Datos del producto
@@ -49,7 +29,7 @@ export async function getProductById(id) {
  * @param {number} [pageSize=12] - Productos por página
  * @returns {Promise<{data: Array, count: number}>} - Lista de productos y total
  */
-export async function getProductsByGenderAndType(gender, type, page = 1, pageSize = 12) {
+export async function getProductsByGenderAndType(gender, type, page = 1, pageSize = 12, brand) {
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
@@ -63,7 +43,11 @@ export async function getProductsByGenderAndType(gender, type, page = 1, pageSiz
     query = query.eq('type', type)
   }
 
-  const { data, error, count } = await query.order('created_at', { ascending: false })
+  if (brand) {
+    query = query.eq('brand', brand)
+  }
+
+  const { data, error, count } = await query.order('name', { ascending: true })
 
   if (error) {
     console.error('Error fetching products by gender and type:', error)
@@ -74,6 +58,33 @@ export async function getProductsByGenderAndType(gender, type, page = 1, pageSiz
 }
 
 /**
+ * Obtiene las marcas disponibles para un género y tipo
+ * @param {string} gender - 'hombre' o 'mujer'
+ * @param {string} [type] - 'perfume', 'reloj' o 'crema' (opcional)
+ * @returns {Promise<Array>} - Lista de marcas únicas ordenadas alfabéticamente
+ */
+export async function getBrands(gender, type) {
+  let query = supabase
+    .from('products')
+    .select('brand')
+    .eq('gender', gender)
+
+  if (type) {
+    query = query.eq('type', type)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('Error fetching brands:', error)
+    throw error
+  }
+
+  const brands = [...new Set((data || []).map((p) => p.brand?.trim()).filter(Boolean))]
+  return brands.sort((a, b) => a.localeCompare(b, 'es'))
+}
+
+/**
  * Obtiene todos los productos (sin filtro de género)
  * @returns {Promise<Array>} - Lista completa de productos
  */
@@ -81,7 +92,7 @@ export async function getAllProducts() {
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('name', { ascending: true })
   
   if (error) {
     console.error('Error fetching all products:', error)
