@@ -20,7 +20,7 @@ function Footer() {
               Lumaré
             </h3>
             <p className="text-lavender-blush/80 leading-relaxed">
-              Tu tienda de confianza. Descubrí los productos más exclusivas.
+              Tu tienda de confianza. Descubrí los productos más exclusivos.
             </p>
           </div>
 
@@ -37,6 +37,16 @@ function Footer() {
                 <Link to="/mujeres" className="text-lavender-blush/80 hover:text-goldenrod transition-colors">
                   Para Mujer
                 </Link>
+              </li>
+              <li>
+                <Link to="/unisex" className="text-lavender-blush/80 hover:text-goldenrod transition-colors">
+                  Unisex
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:info@perfumeszaromac.com" className="text-lavender-blush/80 hover:text-goldenrod transition-colors">
+                  Contacto
+                </a>
               </li>
             </ul>
           </div>

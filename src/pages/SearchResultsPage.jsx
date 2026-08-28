@@ -7,18 +7,6 @@ import { PRODUCT_TYPES } from '../types'
 
 const SEARCH_PAGE_SIZE = 12
 
-function sortProducts(products, order) {
-  if (order === 'default' || !products) return products
-
-  const sorted = [...products]
-  sorted.sort((a, b) => {
-    const priceA = Number(a.price)
-    const priceB = Number(b.price)
-    return order === 'price-asc' ? priceA - priceB : priceB - priceA
-  })
-  return sorted
-}
-
 function SearchResultsPage() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
@@ -26,7 +14,6 @@ function SearchResultsPage() {
   const [allProducts, setAllProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [sortOrder, setSortOrder] = useState('default')
   const [visibleCount, setVisibleCount] = useState(SEARCH_PAGE_SIZE)
 
   useEffect(() => {
@@ -36,7 +23,6 @@ function SearchResultsPage() {
         const data = await getAllProducts()
         setAllProducts(data)
         setVisibleCount(SEARCH_PAGE_SIZE)
-        setSortOrder('default')
       } catch (err) {
         setError(err)
       } finally {
@@ -57,13 +43,8 @@ function SearchResultsPage() {
     })
   }, [allProducts, query])
 
-  const sortedProducts = useMemo(
-    () => sortProducts(filtered, sortOrder),
-    [filtered, sortOrder]
-  )
-
-  const visibleProducts = sortedProducts.slice(0, visibleCount)
-  const hasMore = visibleCount < sortedProducts.length
+  const visibleProducts = filtered.slice(0, visibleCount)
+  const hasMore = visibleCount < filtered.length
 
   if (error) return (
     <div className="min-h-screen bg-lavender-blush/80 flex items-center justify-center">
@@ -86,37 +67,17 @@ function SearchResultsPage() {
           <div className="w-32 h-1 bg-goldenrod mx-auto mt-4"></div>
         </div>
 
-        {!loading && filtered.length > 0 && (
-          <div className="flex justify-end mb-10">
-            <div className="flex items-center gap-3">
-              <label htmlFor="sort-order-search" className="text-charcoal-blue/70 text-sm font-medium uppercase tracking-wide">
-                Ordenar por
-              </label>
-              <select
-                id="sort-order-search"
-                value={sortOrder}
-                onChange={(e) => { setSortOrder(e.target.value); setVisibleCount(SEARCH_PAGE_SIZE) }}
-                className="bg-white border border-goldenrod/20 text-charcoal-blue px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:border-goldenrod/50 focus:ring-1 focus:ring-goldenrod/30 transition-colors cursor-pointer text-sm"
-              >
-                <option value="default">Por defecto</option>
-                <option value="price-asc">Menor precio</option>
-                <option value="price-desc">Mayor precio</option>
-              </select>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={`skeleton-${i}`} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                <div key={`skeleton-${i}`} className="animate-slide-up h-full" style={{ animationDelay: `${i * 0.05}s` }}>
                   <ProductCardSkeleton />
                 </div>
               ))
             : visibleProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="animate-slide-up"
+                  className="animate-slide-up h-full"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <ProductCard product={product} />
@@ -130,7 +91,7 @@ function SearchResultsPage() {
               onClick={() => setVisibleCount((prev) => prev + SEARCH_PAGE_SIZE)}
               className="bg-goldenrod text-white px-10 py-4 rounded-full font-semibold text-lg shadow-lg hover:bg-goldenrod/80 transition-all duration-300"
             >
-              Cargar más ({sortedProducts.length - visibleCount} restantes)
+              Cargar más ({filtered.length - visibleCount} restantes)
             </button>
           </div>
         )}
