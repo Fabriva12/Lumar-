@@ -19,13 +19,17 @@ function HeroSection() {
         {/* Descripción en fuente sans-serif suave */}
         <p className="text-xl text-charcoal-blue/80 max-w-3xl mx-auto leading-relaxed">
           Explorá nuestra exclusiva colección de Productos para hombre y mujer.
+          <br />
+          <span className="text-goldenrod font-semibold">
+            Garantizamos la originalidad de nuestos productos
+          </span>
         </p>
 
         {/* Línea decorativa dorada */}
         <div className="mt-8 w-24 h-1 bg-goldenrod mx-auto"></div>
       </div>
     </div>
-  )
+  );
 }
 
-export default HeroSection
+export default HeroSection;
