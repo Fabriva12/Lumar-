@@ -50,7 +50,7 @@ function ProductCard({ product }) {
           {product.name}
         </h3>
 
-        {product.volume && (
+        {product.volume && product.type !== "reloj" && (
           <p className="text-sm text-goldenrod mt-1 mb-4">{product.volume}</p>
         )}
 
